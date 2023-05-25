@@ -55,6 +55,7 @@
 #include "inverterPacket.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "device.h"
 
 #include "Tcp_Server_IPC.h"
 
@@ -64,7 +65,8 @@
 #define APP_SERVER_PORT  (8888)
 
 static const uint8_t APP_CLIENT_TX_HEADER[] = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: text/event-stream\r\n\r\n";
-static const uint8_t APP_CLIENT_TX_MOCK_DATA[] = "data: { \"msg\": \"Hello From Stream!\" }\n\n";
+static const uint8_t HTTP_OK_RESPONSE[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nok";
+static const uint8_t HTTP_BADREQ_RESPONSE[] = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nnok";
 
 /* ========================================================================== */
 /*                         Structure Declarations                             */
@@ -86,52 +88,120 @@ static void AppTcp_ServerTask(void *arg);
 /*                          Function Definitions                              */
 /* ========================================================================== */
 
-static void AppTcp_echoPckt(struct netconn *pClientConn)
+/**
+ * Server Sent events Stream podataka sa inverter jezgre
+ */
+static void StreamInverterData(struct netconn *pClientConn)
 {
-    struct netbuf *buf;
-    void *data;
-    u16_t len;
     err_t err;
 
-    while ((err = netconn_recv(pClientConn, &buf)) == ERR_OK)
+    // Posalji http response sa headerom da je ovo event-stream
+    err = netconn_write(pClientConn, APP_CLIENT_TX_HEADER, sizeof(APP_CLIENT_TX_HEADER)-1, NETCONN_COPY);
+    if (err != ERR_OK)
     {
-        err = netconn_write(pClientConn, APP_CLIENT_TX_HEADER, sizeof(APP_CLIENT_TX_HEADER)-1, NETCONN_COPY);
+        printf("tcpecho: netconn_write: error \"%s\"\r\n", lwip_strerr(err));
+        return;
+    }
+
+    // Proslijedjuj podatke s inverter jezgre na tcp konekciju
+    do
+    {
+        char messageBuffer[sizeof(InverterStreamPacket_t)] = {0};
+        uint16_t replyMsgSize = sizeof(InverterStreamPacket_t);
+        uint16_t remoteCoreId, remoteCoreEndPt;
+
+        int32_t status = RPMessage_recv(
+            &gAckReplyMsgObject,
+            messageBuffer,
+            &replyMsgSize,
+            &remoteCoreId,
+            &remoteCoreEndPt,
+            SystemP_WAIT_FOREVER);
+
+        if (status != SystemP_SUCCESS) continue;
+
+        char stringMessage[512];
+        int stringLen = stringifyInverterPacket(messageBuffer, stringMessage);
+
+        err = netconn_write(pClientConn, stringMessage, stringLen, NETCONN_COPY);
         if (err != ERR_OK)
         {
             printf("tcpecho: netconn_write: error \"%s\"\r\n", lwip_strerr(err));
             break;
         }
-        do
-        {
-            // ClockP_usleep(300000);
 
+    } while (1);
+}
 
-            char messageBuffer[sizeof(InverterStreamPacket_t)] = {0};
-            uint16_t replyMsgSize = sizeof(InverterStreamPacket_t);
-            uint16_t remoteCoreId, remoteCoreEndPt;
+/**
+ * Helper za mapiranje string endpointa u broj radi efikasnijeg prijenosa na drugu jezgru
+ */
+#define MAP_ENDPOINT_TO_ID(LEN, ENDP, ID) else if (strncmp(requestString, ENDP, LEN) == 0) return ID;
+int getEndpointID(char *requestString)
+{
+    if (strncmp(requestString, "GET /MotEn", 10) == 0) return 0;
+    MAP_ENDPOINT_TO_ID(11, "GET /Id_ref", 1)
+    MAP_ENDPOINT_TO_ID(10, "GET /N_ref", 2)
+    MAP_ENDPOINT_TO_ID(10, "GET /SpdKp", 3)
+    MAP_ENDPOINT_TO_ID(10, "GET /SpdKi", 4)
+    MAP_ENDPOINT_TO_ID(9, "GET /IdKp", 5)
+    MAP_ENDPOINT_TO_ID(9, "GET /IdKi", 6)
+    MAP_ENDPOINT_TO_ID(9, "GET /IqKp", 7)
+    MAP_ENDPOINT_TO_ID(9, "GET /IqKi", 8)
+    MAP_ENDPOINT_TO_ID(11, "GET /ackPer", 9)
 
-            int32_t status = RPMessage_recv(
-                &gAckReplyMsgObject,
-                messageBuffer,
-                &replyMsgSize,
-                &remoteCoreId,
-                &remoteCoreEndPt,
-                SystemP_WAIT_FOREVER);
+    return -1;
+}
 
-            if (status != SystemP_SUCCESS) continue;
+/**
+ * Parsira http request i iscita float iz request parametara
+ */
+err_t extractFloat(const char* http_packet, float32_t *result) {
+    const char* start = strchr(http_packet, '?');
 
-            char stringMessage[512];
-            int stringLen = stringifyInverterPacket(messageBuffer, stringMessage);
+    if (start != NULL) {
+        // Stavi pointer na prvi znak poslije '?'
+        start++;
 
-            err = netconn_write(pClientConn, stringMessage, stringLen, NETCONN_COPY);
-            if (err != ERR_OK)
-            {
-                printf("tcpecho: netconn_write: error \"%s\"\r\n", lwip_strerr(err));
-                break;
-            }
+        char* end;
+        *result = strtod(start, &end);
 
-        } while (1);
+        if (start == end) {
+            // Neuspijesna konverzija floata
+            return -1;
+        } else {
+            return 0;
+        }
+    } else {
+        // Nije pronadjena lokacija znaka ?
+        return -1;
     }
+}
+
+
+/**
+ * Slanje komandi inverteru
+ */
+static void SendCommandToInverter(struct netconn *clientConnection, char *requestString)
+{
+    err_t err;
+
+    float32_t requestValue;
+    err = extractFloat(requestString, &requestValue);
+    if ( err == -1 ) {
+        netconn_write(clientConnection, HTTP_BADREQ_RESPONSE, sizeof(HTTP_BADREQ_RESPONSE)-1, NETCONN_COPY);
+        return;
+    }
+
+    int requestEndpoint = getEndpointID(requestString);
+    if ( requestEndpoint == -1 ) {
+        netconn_write(clientConnection, HTTP_BADREQ_RESPONSE, sizeof(HTTP_BADREQ_RESPONSE)-1, NETCONN_COPY);
+        return;
+    }
+
+    netconn_write(clientConnection, HTTP_OK_RESPONSE, sizeof(HTTP_OK_RESPONSE)-1, NETCONN_COPY);
+
+    printf("Endp id: %u, req value: %.5f\r\n", requestEndpoint, requestValue);
 }
 
 /**
@@ -140,22 +210,24 @@ static void AppTcp_echoPckt(struct netconn *pClientConn)
 static void HandleTcpConnection(void *arg)
 {
     struct netconn *clientConnection = (struct netconn*) arg;
+    struct netbuf *buf;
+    void *data;
+    u16_t len;
     err_t err;
 
-    while(1)
-    {
-        ClockP_usleep(300000);
-        char response[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
-        err = netconn_write(clientConnection, response, sizeof(response)-1, NETCONN_COPY);
-        if (err != ERR_OK)
-        {
-            printf("HandleTcpConnection: netconn_write: error \"%s\"\r\n", lwip_strerr(err));
-            break;
+    err = netconn_recv(clientConnection, &buf);
+    if (err == ERR_OK) {
+        netbuf_data(buf, &data, &len);
+        char *reqString = (char *)data;
+        if (strncmp(reqString, "GET /stream", 11) == 0) {
+            StreamInverterData(clientConnection);
+        } else if (strncmp(reqString, "GET ", 4) == 0) {
+            SendCommandToInverter(clientConnection, reqString);
         }
     }
 
     // ConnMgm
-    printf("Closed client connection %p\r\n", clientConnection);
+    printf("HandleTcpConnection: closed client connection %p\r\n", clientConnection);
     netconn_close(clientConnection);
     netconn_delete(clientConnection);
 
