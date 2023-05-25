@@ -1,0 +1,36 @@
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc_tmp] Parsing file ...
+Found section 0 with adddress 0x00000000, size 0x00000040 bytes
+Found section 1 with adddress 0x700be210, size 0x00026520 bytes
+Found section 2 with adddress 0x700e4730, size 0x0000fe00 bytes
+Found section 3 with adddress 0x700f4530, size 0x00004db8 bytes
+Found section 4 with adddress 0x700fd300, size 0x00000778 bytes
+Found section 5 with adddress 0x700fda78, size 0x00000430 bytes
+Found section 6 with adddress 0x700fdea8, size 0x00000208 bytes
+Found section 7 with adddress 0x700fe0b0, size 0x00000130 bytes
+Found section 8 with adddress 0x700fe1e0, size 0x00000008 bytes
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc_tmp] Found 9 sections. 9 are non-XIP sections, 0 are XIP sections, NON-XIP entryPoint = 0x00000000
+Merging section @ 0x700e4730 of size 0x0000fe00, with section @ 0x700be210 of size 0x00026520
+Merging section @ 0x700f4530 of size 0x00004db8, with section @ 0x700be210 of size 0x00036320
+Merging section @ 0x700fda78 of size 0x00000430, with section @ 0x700fd300 of size 0x00000778
+Merging section @ 0x700fdea8 of size 0x00000208, with section @ 0x700fd300 of size 0x00000ba8
+Merging section @ 0x700fe0b0 of size 0x00000130, with section @ 0x700fd300 of size 0x00000db0
+Merging section @ 0x700fe1e0 of size 0x00000008, with section @ 0x700fd300 of size 0x00000ee0
+Writing section header  #0, adddress 0x00000000, size 0x00000040 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x00000000, size 0x00000040 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section header  #1, adddress 0x700be210, size 0x0003b0d8 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700be210, size 0x00026520 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700e4730, size 0x0000fe00 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700f4530, size 0x00004db8 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section header  #2, adddress 0x700fd300, size 0x00000ee8 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700fd300, size 0x00000778 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700fda78, size 0x00000430 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700fdea8, size 0x00000208 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700fe0b0, size 0x00000130 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+Writing section data with adddress 0x700fe1e0, size 0x00000008 bytes to file [C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc]
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc] Parsing file ...
+Found section 0 with adddress 0x00000000, size 0x00000040 bytes
+Found section 1 with adddress 0x700be210, size 0x0003b0d8 bytes
+Found section 2 with adddress 0x700fd300, size 0x00000ee8 bytes
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc] Found 3 sections. 3 are non-XIP sections, 0 are XIP sections, NON-XIP entryPoint = 0x00000000
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc_xip] Parsing file ...
+[C:/Users/Robi/workspace_v12/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang/Release/enet_cpsw_tcpserver_am263x-lp_r5fss0-0_freertos_ti-arm-clang.rprc_xip] Found 0 sections. 0 are non-XIP sections, 0 are XIP sections, NON-XIP entryPoint = 0x00000000
