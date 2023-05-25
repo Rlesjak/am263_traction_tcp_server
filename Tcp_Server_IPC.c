@@ -22,22 +22,7 @@ void IPC_SendMessage()
 
     RPMessage_send(
         sendMsg, strlen(sendMsg),
-        CSL_CORE_ID_R5FSS0_0, 13,
+        INVERTER_CORE_ID, INVERTER_ENDPOINT,
         RPMessage_getLocalEndPt(&gAckReplyMsgObject),
         100);
-}
-
-void IPC_ReceveMessage()
-{
-    char sendMsg[64] = "hello, tcp!!!";
-    char replyMsg[64];
-    uint16_t replyMsgSize, remoteCoreId, remoteCoreEndPt;
-    /* set 'replyMsgSize' to size of recv buffer,
-     * after return `replyMsgSize` contains actual size of valid data in recv buffer
-     */
-    replyMsgSize = sizeof(replyMsg); /*  */
-    RPMessage_recv(&gAckReplyMsgObject,
-        replyMsg, &replyMsgSize,
-        &remoteCoreId, &remoteCoreEndPt,
-        SystemP_WAIT_FOREVER);
 }

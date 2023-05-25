@@ -68,9 +68,20 @@ static const uint8_t APP_CLIENT_TX_HEADER[] = "HTTP/1.1 200 OK\r\nAccess-Control
 static const uint8_t HTTP_OK_RESPONSE[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nok";
 static const uint8_t HTTP_BADREQ_RESPONSE[] = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nnok";
 
+#define SERIALIZE_FIELD(bufferPtr, struct, field) \
+memcpy(bufferPtr, &(struct.field), sizeof(struct.field)); \
+bufferPtr += sizeof(struct.field);
+
 /* ========================================================================== */
 /*                         Structure Declarations                             */
 /* ========================================================================== */
+
+
+typedef struct __CommandPacket {
+   int endpoint;
+   float32_t value;
+} CommandPacket;
+
 
 /* ========================================================================== */
 /*                          Function Declarations                             */
@@ -139,16 +150,16 @@ static void StreamInverterData(struct netconn *pClientConn)
 #define MAP_ENDPOINT_TO_ID(LEN, ENDP, ID) else if (strncmp(requestString, ENDP, LEN) == 0) return ID;
 int getEndpointID(char *requestString)
 {
-    if (strncmp(requestString, "GET /MotEn", 10) == 0) return 0;
-    MAP_ENDPOINT_TO_ID(11, "GET /Id_ref", 1)
-    MAP_ENDPOINT_TO_ID(10, "GET /N_ref", 2)
-    MAP_ENDPOINT_TO_ID(10, "GET /SpdKp", 3)
-    MAP_ENDPOINT_TO_ID(10, "GET /SpdKi", 4)
-    MAP_ENDPOINT_TO_ID(9, "GET /IdKp", 5)
-    MAP_ENDPOINT_TO_ID(9, "GET /IdKi", 6)
-    MAP_ENDPOINT_TO_ID(9, "GET /IqKp", 7)
-    MAP_ENDPOINT_TO_ID(9, "GET /IqKi", 8)
-    MAP_ENDPOINT_TO_ID(11, "GET /ackPer", 9)
+    if (strncmp(requestString, "GET /MotEn", 10) == 0) return 1;
+    MAP_ENDPOINT_TO_ID(11, "GET /Id_ref", 2)
+    MAP_ENDPOINT_TO_ID(10, "GET /N_ref", 3)
+    MAP_ENDPOINT_TO_ID(10, "GET /SpdKp", 4)
+    MAP_ENDPOINT_TO_ID(10, "GET /SpdKi", 5)
+    MAP_ENDPOINT_TO_ID(9, "GET /IdKp", 6)
+    MAP_ENDPOINT_TO_ID(9, "GET /IdKi", 7)
+    MAP_ENDPOINT_TO_ID(9, "GET /IqKp", 8)
+    MAP_ENDPOINT_TO_ID(9, "GET /IqKi", 9)
+    MAP_ENDPOINT_TO_ID(11, "GET /ackPer", 10)
 
     return -1;
 }
@@ -199,9 +210,21 @@ static void SendCommandToInverter(struct netconn *clientConnection, char *reques
         return;
     }
 
-    netconn_write(clientConnection, HTTP_OK_RESPONSE, sizeof(HTTP_OK_RESPONSE)-1, NETCONN_COPY);
+    CommandPacket commandPacket = { requestEndpoint, requestValue };
 
-    printf("Endp id: %u, req value: %.5f\r\n", requestEndpoint, requestValue);
+    char serialisedPacket[sizeof(commandPacket)];
+    char *bufferPtr = serialisedPacket;
+
+    SERIALIZE_FIELD(bufferPtr, commandPacket, endpoint);
+    SERIALIZE_FIELD(bufferPtr, commandPacket, value);
+
+    RPMessage_send(
+            &serialisedPacket, sizeof(serialisedPacket),
+            INVERTER_CORE_ID, INVERTER_ENDPOINT,
+            RPMessage_getLocalEndPt(&gAckReplyMsgObject),
+            50);
+
+    netconn_write(clientConnection, HTTP_OK_RESPONSE, sizeof(HTTP_OK_RESPONSE)-1, NETCONN_COPY);
 }
 
 /**

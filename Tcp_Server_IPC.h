@@ -10,6 +10,9 @@
 
 #include <drivers/ipc_rpmsg.h>
 
+#define INVERTER_ENDPOINT 10
+#define INVERTER_CORE_ID CSL_CORE_ID_R5FSS0_0
+
 RPMessage_Object gAckReplyMsgObject;
 
 void setup_IPC();
