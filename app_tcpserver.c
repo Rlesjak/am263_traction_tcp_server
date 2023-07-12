@@ -127,9 +127,21 @@ static void StreamInverterData(struct netconn *pClientConn)
             &replyMsgSize,
             &remoteCoreId,
             &remoteCoreEndPt,
-            SystemP_WAIT_FOREVER);
+            1000);
 
-        if (status != SystemP_SUCCESS) continue;
+//        int32_t status = RPMessage_recv(
+//                    &gAckReplyMsgObject,
+//                    messageBuffer,
+//                    &replyMsgSize,
+//                    &remoteCoreId,
+//                    &remoteCoreEndPt,
+//                    SystemP_WAIT_FOREVER);
+
+        if (status == SystemP_TIMEOUT) continue;
+        if (status != SystemP_SUCCESS) {
+            printf("RPMessage_recv:ERROR: \"%i\"\r\n", status);
+            break;
+        }
 
         char stringMessage[512];
         int stringLen = stringifyInverterPacket(messageBuffer, stringMessage);
